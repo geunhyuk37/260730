@@ -6,7 +6,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="초·중학생 12년 증감 및 추이", layout="wide")
 st.title("🗺️ 전국 초·중학생 12년 증감 및 추이")
-st.caption("2015년 대비 2026년 시군구별 전체 인구 대비 학생 비율 증감 및 연도별 인구수 변화")
+st.caption("2015년 대비 2026년 시군구별 전체 인구 대비 학생 비율 증감(%p) 및 연도별 인구수 변화")
 
 POP_URL = "https://raw.githubusercontent.com/greatsong/modudata/main/data/population_yearly.csv.gz"
 GEO_URL = "https://raw.githubusercontent.com/greatsong/modudata/main/data/boundaries/sigungu_kr.geojson"
@@ -38,12 +38,12 @@ df["전체인구"] = df[total_cols].sum(axis=1)
 df["초등학생인구"] = df[elem_cols].sum(axis=1)
 df["중학생인구"] = df[mid_cols].sum(axis=1)
 
-# 4. '코드' 앞 5자리 = 시군구 코드 → 연도별, 시군구별 묶기 및 비율 계산 (100에서 10으로 수정)
+# 4. '코드' 앞 5자리 = 시군구 코드 → 연도별, 시군구별 묶기 및 비율 계산 (다시 100으로 변경)
 df["시군구코드"] = df["코드"].str[:5]
 grouped = df.groupby(["연도", "시군구코드"])[["전체인구", "초등학생인구", "중학생인구"]].sum().reset_index()
 
-grouped["초등학생비율"] = (grouped["초등학생인구"] / grouped["전체인구"] * 0.1).round(2)
-grouped["중학생비율"] = (grouped["중학생인구"] / grouped["전체인구"] * 0.1).round(2)
+grouped["초등학생비율"] = (grouped["초등학생인구"] / grouped["전체인구"] * 100).round(2)
+grouped["중학생비율"] = (grouped["중학생인구"] / grouped["전체인구"] * 100).round(2)
 
 # 경계 파일에서 코드 → 시군구·시도 이름 짝 만들기
 names = pd.DataFrame([
@@ -56,7 +56,7 @@ names = pd.DataFrame([
 ])
 merged_all = grouped.merge(names, on="시군구코드", how="inner")
 
-# 5. 12년간 증감 계산
+# 5. 12년간 증감(%p) 계산
 min_year = merged_all["연도"].min()
 max_year = merged_all["연도"].max()
 
@@ -72,7 +72,7 @@ st.subheader("1. 시군구별 12년간 비율 증감 지도")
 view_option_map = st.radio("지도에서 조회할 대상을 선택하세요", ["중학생", "초등학생"], horizontal=True, key="map_radio")
 target_diff = f"{view_option_map}_증감"
 
-# 6. 단계구분도 그리기 (range_color로 -15 ~ 15 고정)
+# 6. 단계구분도 그리기 (range_color로 -1.5 ~ 1.5 고정)
 fig_map = px.choropleth(
     diff_df,
     geojson=geojson,
@@ -81,10 +81,10 @@ fig_map = px.choropleth(
     color=target_diff,
     color_continuous_scale="RdBu",
     color_continuous_midpoint=0,
-    range_color=[-15, 15], 
+    range_color=[-1.5, 1.5], 
     hover_name="시군구",
     hover_data={"시도": True, "시군구코드": False, target_diff: True},
-    title=f"12년간({min_year}~{max_year}) {view_option_map} 비율 증감"
+    title=f"12년간({min_year}~{max_year}) {view_option_map} 비율 증감 (%p)"
 )
 
 # 윤곽선 추가 (0인 지역 확인 가능하도록 설정)
