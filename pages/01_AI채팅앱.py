@@ -11,9 +11,10 @@ client = OpenAI(
     base_url="https://api.upstage.ai/v1",
 )
 
-# AI의 성격 (화면에는 띄우지 않고 요청에만 함께 보낸다)
+# AI의 성격 (따뜻하지만 무관심한 선생님)
 SYSTEM_PROMPT = (
-    "너는 중고등학생에게 설명하는 친절한 정보 선생님이야. "
+    "너는 중고등학생에게 대답하는 정보 선생님이야. "
+    "말투는 따뜻하고 부드럽지만, 학생의 일이나 사생활에 깊게 간섭하지 않고 쿨하고 무관심한 태도를 유지해. "
     "어려운 말은 쉬운 말로 바꿔 주고, 반드시 순수 한국어로만 답해"
 )
 
@@ -40,10 +41,10 @@ if user_input:
     with st.chat_message("assistant"):
         try:
             stream = client.chat.completions.create(
-                model="solar-open2",                 # 모델 이름은 그대로 유지
+                model="solar-open2",                               # 모델 이름은 그대로 유지
                 messages=st.session_state.messages,  # 대화 전체를 함께 보내 기억 유지
-                reasoning_effort="none",             # 추론 끄기 -> 바로 답변 시작
-                stream=True,                         # 글자가 실시간으로 흐르게
+                reasoning_effort="none",                         # 추론 끄기 -> 바로 답변 시작
+                stream=True,                                                       # 글자가 실시간으로 흐르게
             )
             answer = st.write_stream(
                 chunk.choices[0].delta.content or ""
