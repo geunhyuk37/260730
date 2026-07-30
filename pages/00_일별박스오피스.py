@@ -14,7 +14,6 @@ KOBIS_KEY = st.secrets["KOBIS_KEY"]
 yesterday = datetime.now(ZoneInfo("Asia/Seoul")) - timedelta(days=1)
 
 # 사이드바 또는 상단에 달력(날짜 선택 위젯) 배치
-# 데이터가 보통 하루 전까지 제공되므로 기본값은 어제로 설정하고, 선택 가능한 가장 옛날 날짜나 오늘까지의 범위 설정 가능
 selected_date = st.date_input(
     "조회할 날짜를 선택하세요",
     value=yesterday,
@@ -50,10 +49,10 @@ df = pd.DataFrame(box_list)
 for col in ["rank", "audiCnt", "audiAcc", "scrnCnt", "showCnt"]:
     df[col] = pd.to_numeric(df[col])
 
-# 1위 영화 지표 카드 세 장
+# 1위 영화 지표 카드 세 장 (왕관 이모지 추가)
 top = df.sort_values("rank").iloc[0]
 c1, c2, c3 = st.columns(3)
-c1.metric("어제 1위" if selected_date == yesterday else "해당일 1위", top["movieNm"])
+c1.metric("어제 1위" if selected_date == yesterday else "해당일 1위", f"👑 {top['movieNm']}")
 c2.metric("관객수", f"{top['audiCnt']:,}명")
 c3.metric("누적 관객", f"{top['audiAcc']:,}명")
 
@@ -61,6 +60,9 @@ c3.metric("누적 관객", f"{top['audiAcc']:,}명")
 table = df[["rank", "movieNm", "openDt", "audiCnt", "audiAcc", "scrnCnt"]].copy()
 table.columns = ["순위", "영화명", "개봉일", "관객수", "누적관객", "스크린수"]
 table = table.sort_values("순위").reset_index(drop=True)
+
+# 표 안의 1위 영화 이름에도 왕관 이모지 추가
+table.loc[table["순위"] == 1, "영화명"] = "👑 " + table.loc[table["순위"] == 1, "영화명"]
 
 st.subheader("📋 박스오피스 TOP 10")
 st.dataframe(table)
