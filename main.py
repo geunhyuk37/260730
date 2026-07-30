@@ -42,8 +42,8 @@ df["중학생인구"] = df[mid_cols].sum(axis=1)
 df["시군구코드"] = df["코드"].str[:5]
 grouped = df.groupby(["연도", "시군구코드"])[["전체인구", "초등학생인구", "중학생인구"]].sum().reset_index()
 
-grouped["초등학생비율"] = (grouped["초등학생인구"] / grouped["전체인구"] * 10).round(2)
-grouped["중학생비율"] = (grouped["중학생인구"] / grouped["전체인구"] * 10).round(2)
+grouped["초등학생비율"] = (grouped["초등학생인구"] / grouped["전체인구"] * 0.1).round(2)
+grouped["중학생비율"] = (grouped["중학생인구"] / grouped["전체인구"] * 0.1).round(2)
 
 # 경계 파일에서 코드 → 시군구·시도 이름 짝 만들기
 names = pd.DataFrame([
